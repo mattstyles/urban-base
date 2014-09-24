@@ -1,0 +1,48 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Urban-Base Tests</title>
+
+    <script src="../../platform/platform.js"></script>
+
+    <link rel="import" href="../urban-base.html">
+
+    <link rel="stylesheet" href="./mocha/mocha.css" media="screen" charset="utf-8">
+</head>
+<body>
+    <urban-base></urban-base>
+
+    <div id="mocha">
+        <p><a href=".">Index</a></p>
+    </div>
+    <div id="messages"></div>
+    <div id="fixtures"></div>
+
+    <script src="./lodash/dist/lodash.min.js"></script>
+    <script src="./mocha/mocha.js"></script>
+    <script src="./chai/chai.js"></script>
+    <script src="./sinon-chai/lib/sinon-chai.js"></script>
+    <script src="./sinon/sinon.js"></script>
+    <script charset="utf-8">mocha.setup( 'bdd' );</script>
+    <script charset="utf-8">
+        // Helpers
+        var test = {
+            createBase: function() {
+                var base = document.createElement( 'urban-base' );
+                document.body.appendChild( base );
+            },
+
+            removeBase: function() {
+                var bases = document.querySelectorAll( 'urban-base' );
+                Array.prototype.forEach.call( bases, function( base ) {
+                    base.parentElement.removeChild( base );
+                });
+            }
+        }
+    </script>
+    <script src="./bind.js"></script>
+    <script src="./events.js"></script>
+    <script charset="utf-8">mocha.run();</script>
+</body>
+</html>
