@@ -43,6 +43,10 @@
     </script>
     <script src="./bind.js"></script>
     <script src="./events.js"></script>
-    <script charset="utf-8">mocha.run();</script>
+    <script charset="utf-8">
+        document.addEventListener( 'polymer-ready', function() {
+            mocha.run();
+        });
+    </script>
 </body>
 </html>
