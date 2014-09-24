@@ -8,6 +8,11 @@
 
                 Polymer( 'urban-base', {
 
+                    /**
+                     * List of attached listeners
+                     */
+                    _listeners: null,
+
 
                     /*-----------------------------------------------------------*\
                      *
@@ -15,10 +20,11 @@
                      *
                     \*-----------------------------------------------------------*/
 
+                    created: function() {
+                        this._listeners = [];
+                    },
 
-                    /**
-                     * Fired when Polymer has got the element ready
-                     */
+
                     ready: function() {
                         this.bindAll( this );
                     },
@@ -53,17 +59,23 @@
                     /**
                      * Adds an event listener that will be removed after the first execution
                      *
-                     * @param event {String} id of event to listen for
+                     * @param type {String} id of event to listen for
                      * @param cb {Function} the callback to fire when the event is fired
                      * @param ctx {Object} the context the callback should be run in, defaults to __this__
                      */
-                    once: function( event, cb, ctx ) {
-                        var callback = function( e ) {
-                            this.removeEventListener( event, callback );
-                            cb.call( ctx || this, e );
+                    once: function( type, data, cb, ctx ) {
+                        // If data was not supplied then it'll be the handler
+                        if ( typeof data === 'function' ) {
+                            this.once( type, null, data, cb );
+                            return;
+                        }
+
+                        var callback = function( event ) {
+                            this.removeEventListener( type, callback );
+                            cb.call( ctx || this, event, data );
                         }.bind( this );
 
-                        this.addEventListener( event, callback );
+                        this.addEventListener( type, callback );
                     }
                 });
 
