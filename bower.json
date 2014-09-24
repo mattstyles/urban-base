@@ -1,0 +1,28 @@
+{
+  "name": "urban-base",
+  "version": "0.0.0",
+  "authors": [
+    "Matt Styles <@personalurban>"
+  ],
+  "description": "Base element for urban-components",
+  "main": "urban-base.html",
+  "keywords": [
+    "polymer",
+    "web-components",
+    "urban-components",
+    "base"
+  ],
+  "license": "WTFPL",
+  "homepage": "https://github.com/mattstyles/urban-base/",
+  "ignore": [
+    "**/.*",
+    "node_modules",
+    "bower_components",
+    "../",
+    "test",
+    "tests"
+  ],
+  "dependencies": {
+    "polymer": "Polymer/polymer#>=0.4.0 <1.0.0"
+  }
+}
