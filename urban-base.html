@@ -20,10 +20,54 @@
                 }
 
 
+                /**
+                 * Simple find for checking the listeners array for a listener
+                 *
+                 * @param listeners {Array} the array to search
+                 * @param listener {Function} the handler and event to search for
+                 * @returns {Integer} the index of the function within the array or -1 if not found
+                 */
+                function findListener( listeners, listener ) {
+                    var i = listeners.length;
+                    while( i-- ) {
+                        if ( listeners[ i ].event === listener.event && listeners[ i ].listener === listener.listener ) {
+                            return i;
+                        }
+                    }
+                    return -1;
+                }
+
+
+                /**
+                 * Returns a list of indices that correspond to a certain event
+                 *
+                 * @param listeners {Array} the search space
+                 * @param event {String} id of string to search for
+                 * @returns {Array:Integers} indices of corresponding handlers for events
+                 */
+                function findEventListeners( listeners, event ) {
+                    var i = listeners.length;
+                    var output = [];
+                    while( i-- ) {
+                        if ( listeners[ i ].event === event ) {
+                            output.push( i );
+                        }
+                    }
+                    return output;
+                }
+
+
                 Polymer( 'urban-base', {
 
                     /**
                      * List of attached listeners
+                     *
+                     * Elements appended to this array should be
+                     *   {
+                     *     event,    // the event a listener is bound to
+                     *     listener, // the unwrapped listener passed to .on
+                     *     handler   // the actual handler attached to the event
+                     *   }
                      */
                     _listeners: null,
 
@@ -88,7 +132,7 @@
                         var callback = function( event ) {
                             this.removeEventListener( type, callback );
 
-                            // Append emitter data to event.detail
+                            // Append listener data to event.detail
                             if ( typeof data === 'object' ) {
                                 event.detail = extend( event.detail, data );
                             } else {
@@ -105,11 +149,60 @@
                     /**
                      * Semi-alias for addEventListener.
                      * Wraps context to the listening object.
-                     *
+                     * Allows data to be passed by the listener function.
                      */
                     on: function( type, data, cb, ctx ) {
+                        // Arity
+                        if ( typeof data === 'function' ) {
+                            this.on( type, null, data, cb );
+                            return;
+                        }
 
+                        var callback = function( event ) {
+                            // Append listener data to event.detail
+                            if ( typeof data === 'object' ) {
+                                event.detail = extend( event.detail, data );
+                            } else {
+                                event.detail.data = data;
+                            }
+
+                            cb.call( ctx || this, event );
+                        }.bind( this );
+
+                        this._listeners.push({
+                            event: type,
+                            listener: cb,
+                            handler: callback
+                        });
+                        this.addEventListener( type, callback );
+                    },
+
+
+                    /**
+                     * Semi-alias for removeEventListener.
+                     * Removes an event listener previously attached using .on
+                     */
+                    off: function( type, cb ) {
+                        // If not cb is supplied then nuke all events for this element
+                        if ( !cb ) {
+                            console.log( 'not yet implemented, give me a handler to remove' );
+                        }
+
+                        var i = findListener( this._listeners, {
+                            event: type,
+                            listener: cb
+                        });
+
+                        // If listener is not found bound to this event then bail
+                        if ( i < 0 ) {
+                            return;
+                        }
+
+                        // Otherwise remove event listener and kill it in the listener array
+                        this.removeEventListener( type, this._listeners[ i ].handler );
+                        this._listeners.splice( i, 1 );
                     }
+
                 });
 
 
