@@ -54,9 +54,9 @@
                      * Adds an event listener that will be removed after the first execution
                      */
                     once: function( event, cb, ctx ) {
-                        var callback = function() {
+                        var callback = function( e ) {
                             this.removeEventListener( event, callback );
-                            cb.call( ctx || this );
+                            cb.call( ctx || this, e );
                         }.bind( this );
 
                         this.addEventListener( event, callback );
