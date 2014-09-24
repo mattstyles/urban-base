@@ -150,6 +150,22 @@
                      * Semi-alias for addEventListener.
                      * Wraps context to the listening object.
                      * Allows data to be passed by the listener function.
+                     *
+                     * Data is bound to the event.detail hash which means that listeners that the first bound callback data will take precedence over subsequent calls although data emitted will always trump listener data, in this way default values could be set up.
+                     *   el.on( 'test', {data:'first'}, fn );
+                     *   el.on( 'test', {data:'second'}, fn );
+                     *   el.fire( 'test', { data: 'emitter' } );
+                     * Two callbacks will be fired but event.detail.data will equal 'emitter' in both of them, however, when data is omitted from the emitter,
+                     *   el.fire( 'test' );
+                     * both callbacks will be fired with {data:'first'} as that takes place on event.detail first and wont be mutated by subsequent requests
+                     *
+                     * This is all due to a cascade of data being appended to listeners. If the data being bound to handlers have different keys then each in turn will be added. This is due to event.detail being shared amongst all listeners to an event, rather than created anew.
+                     * @TODO: For now, this isnt really causing many problems, but its an area to look at for sure.
+                     *
+                     * @param type {String} the event type to bind to
+                     * @param data {Anything} _optional_ data to be passed to the event callback
+                     * @param cb {Function} handler function to execute
+                     * @param ctx {Object} the context to run the callback in
                      */
                     on: function( type, data, cb, ctx ) {
                         // Arity
@@ -181,11 +197,21 @@
                     /**
                      * Semi-alias for removeEventListener.
                      * Removes an event listener previously attached using .on
+                     * If callback is omitted then it'll remove all listeners on the event.
+                     *
+                     * @param type {String} the event
+                     * @param cb {Function} handler function to remove
                      */
                     off: function( type, cb ) {
-                        // If not cb is supplied then nuke all events for this element
+                        // If cb is not supplied then nuke all events for this element
                         if ( !cb ) {
-                            console.log( 'not yet implemented, give me a handler to remove' );
+                            var indices = findEventListeners( this._listeners, type );
+                            for ( var index in indices ) {
+                                this.removeEventListener( type, this._listeners[ indices[ index ] ].handler );
+                                // Dont worry about splicing as indices are reverse ordered
+                                this._listeners.splice( indices[ index ], 1 );
+                            }
+                            return;
                         }
 
                         var i = findListener( this._listeners, {
