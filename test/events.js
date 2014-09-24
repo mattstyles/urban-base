@@ -122,6 +122,8 @@ describe( 'Events', function() {
             quux: 'quux'
         };
 
+        var stringArg = 'foobarbaz';
+
         it( 'expects that a listener can apply arguments to a handler', function( done ) {
             base.on( 'testEvent', args, function( event ) {
                 expect( event.detail ).to.deep.equal( args );
@@ -153,7 +155,83 @@ describe( 'Events', function() {
             });
             base.fire( 'testEvent', args );
         });
+
+        it( 'expects that a string can be passed as an arg', function( done ) {
+            base.on( 'testEvent', stringArg, function( event ) {
+                expect( event.detail.data ).to.equal( stringArg );
+                done();
+            });
+            base.fire( 'testEvent' );
+        });
     });
 
-    
+    describe( '.off', function() {
+        var fn = function() {};
+
+        beforeEach( function () {
+            base.on( 'testEvent', noop );
+        });
+
+        it( 'expects that calling off will remove an event from the list', function() {
+            expect( base._listeners.length ).to.equal( 1 );
+            base.off( 'testEvent', noop );
+
+            expect( base._listeners.length ).to.equal( 0 );
+        });
+
+        it( 'expects that a specific handler can be removed an event type', function() {
+            base.on( 'testEvent', fn );
+            expect( base._listeners.length ).to.equal( 2 );
+
+            base.off( 'testEvent', noop );
+            expect( base._listeners.length ).to.equal( 1 );
+            expect( base._listeners[ 0 ].listener ).to.equal( fn );
+        });
+
+        it( 'expects that a function can be assigned to multiple events and removed individually', function() {
+            base.on( 'anotherEvent', noop );
+
+            base.off( 'testEvent', noop );
+            expect( base._listeners[ 0 ].listener ).to.equal( noop );
+            expect( base._listeners[ 0 ].event ).to.equal( 'anotherEvent' );
+            expect( _.filter( base._listeners, { event: 'testEvent' } ).length ).to.equal( 0 );
+        });
+    });
+
+    describe( '.off - all off', function() {
+        var fn = function() {};
+
+        beforeEach( function () {
+            base.on( 'testEvent', noop );
+            base.on( 'testEvent', fn );
+        });
+
+        it( 'expects that turning off an event removes all bound handlers', function() {
+            base.off( 'testEvent' );
+
+            expect( base._listeners.length ).to.equal( 0 );
+        });
+    });
+
+
+    describe( '.once', function() {
+        var fn = null;
+
+        beforeEach( function() {
+            fn = sinon.spy();
+            base.once( 'testEvent', fn );
+        });
+
+        afterEach( function() {
+            fn = null;
+        });
+
+        it( 'expects the handler to be called only once', function() {
+            base.fire( 'testEvent' );
+            expect( fn ).to.have.been.called;
+
+            base.fire( 'testEvent' );
+            expect( fn ).to.have.been.calledOnce;
+        });
+    })
 });
