@@ -2,15 +2,6 @@
 
 <polymer-element name="urban-base">
 
-    <template>
-        <style media="screen">
-            :host {
-                display: none !important;
-            }
-
-        </style>
-    </template>
-
     <script charset="utf-8">
 
             (function( root ) {
@@ -56,6 +47,19 @@
                                 }
                             }
                         }
+                    },
+
+
+                    /**
+                     * Adds an event listener that will be removed after the first execution
+                     */
+                    once: function( event, cb, ctx ) {
+                        var callback = function() {
+                            this.removeEventListener( event, callback );
+                            cb.call( ctx || this );
+                        }.bind( this );
+
+                        this.addEventListener( event, callback );
                     }
                 });
 
