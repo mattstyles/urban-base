@@ -52,6 +52,10 @@
 
                     /**
                      * Adds an event listener that will be removed after the first execution
+                     *
+                     * @param event {String} id of event to listen for
+                     * @param cb {Function} the callback to fire when the event is fired
+                     * @param ctx {Object} the context the callback should be run in, defaults to __this__
                      */
                     once: function( event, cb, ctx ) {
                         var callback = function( e ) {
